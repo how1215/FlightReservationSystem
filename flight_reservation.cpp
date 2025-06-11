@@ -19,3 +19,12 @@ class Airline {
     public:
         Airline(std::string name): name(name) {};
 };
+
+class PersonRole {
+
+
+
+
+
+    
+};
