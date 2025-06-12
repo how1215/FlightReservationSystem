@@ -2,6 +2,7 @@
 #include <string>
 #include <vector>
 
+//Forward declaration
 class RegularFlight;
 
 class SpecificFlight{
@@ -71,40 +72,87 @@ class Airline {
             return "查無此航班";
         }
 
+        //列出此航空公司的所有regular flight
+        void listRegularFlights(){
+            for(auto& r:regularFlights){
+                std::cout << r->getTime() << " " << r->getFlightNumber() << std::endl;
+            }
+        }
+
 };
 
 class PersonRole {
-    
+    Person* person;
+    public:
+        PersonRole(Person* person): person(person) {}
+        virtual void displayRole() = 0;
 }; 
 
 class Person {
     private:
         std::string name;
         std::string idNumber;
-
     public:
         Person(const std::string& name, const std::string& idNumber): name(name), idNumber(idNumber) {};
         std::string getName() const { return name; }
         std::string getIdNumber() const { return idNumber; }
 };
 
+//兩個職位class都繼承自PersonRole
+class PassegerRole: public PersonRole{
+    public:
+        void displayRole(){
+            std::cout << "Passenger" << std::endl;
+        }
+};
+
+class EmployeeRole: public PersonRole{
+    public:
+        void displayRole(){
+            std::cout << "Employee" << std::endl;
+        }
+};
+
 int main(){
 
     Airline ootumlia("Ootumlia Airlines");
-    
+    //Creating a new regular flight
     RegularFlight* r1 = ootumlia.addRegularFlight("09:00", "111");
     RegularFlight* r2 = ootumlia.addRegularFlight("10:00", "222");
     RegularFlight* r3 = ootumlia.addRegularFlight("11:00", "333");
     RegularFlight* r4 = ootumlia.addRegularFlight("12:00", "444");
-    
+    //Creating a specific flight
     r1->addSpecificFlight("20250101");
+    r1->addSpecificFlight("20250102");
+    r1->addSpecificFlight("20250103");
+
+    r2->addSpecificFlight("20250101");
     r2->addSpecificFlight("20250102");
+    r2->addSpecificFlight("20250103");
+
+    r3->addSpecificFlight("20250101");
+    r3->addSpecificFlight("20250102");
     r3->addSpecificFlight("20250103");
-    r4->addSpecificFlight("20250104");
+
+    //Listing all regular flights
+    ootumlia.listRegularFlights();  
 
     std::string flightNumber;
     std::cin >> flightNumber;   
+
+    //Searching for a flight
     std::cout << ootumlia.findParticularRegular(flightNumber) << std::endl;
 
+
+    //Modifying attributes of a flight
+    std::cout << "修改後航班" << std::endl;
+    r1->setTime("10:00");
+    r1->setFlightNumber("112");
+
+    ootumlia.listRegularFlights();  
+
+
+    //Searching for a flight
+    std::cout << ootumlia.findParticularRegular(flightNumber) << std::endl;
     return 0;
 }
