@@ -4,6 +4,7 @@
 
 //Forward declaration
 class RegularFlight;
+class Person;
 
 class SpecificFlight{
         private:
@@ -15,7 +16,7 @@ class SpecificFlight{
             std::string getDate() const { return date; }
             RegularFlight* getRegularFlight() const { return regularFlight; }
 };
-
+ 
 class RegularFlight {
     private:
         std::string time;
@@ -47,25 +48,47 @@ class Airline {
 };
 
 class PersonRole {
-    
-
+    private:
+        Person* person;
+    public:
+        PersonRole(Person* person): person(person) {};
+        Person* getPerson() const { return person; }
+        void setPerson(Person* person){this->person=person;}
+        //純虛函數供子類別繼承後override
+        virtual void displayRole() = 0;
 }; 
 
 class Person {
     private:
         std::string name;
         std::string idNumber;
-        PersonRole* role;
+        //一個人可以有多個職位
+        std::vector<PersonRole* > roles;
 
     public:
-        Person(const std::string& name, const std::string& idNumber, PersonRole* role): name(name), idNumber(idNumber), role(role) {};
+        Person(const std::string& name, const std::string& idNumber): name(name), idNumber(idNumber) {};
         std::string getName() const { return name; }
         std::string getIdNumber() const { return idNumber; }
-};
+
+
+        void addRole(PersonRole* role){
+            roles.push_back(role);
+        }
+
+        //顯示這位使用者的所有職位
+        void displayRoles() const {
+            std::cout << name << " (" << idNumber << ") has roles :\n";
+            for (const auto& role : roles) {
+                role->displayRole();
+            }
+        }
+    };
+
 
 //兩個職位class都繼承自PersonRole
 class PassegerRole: public PersonRole{
     public:
+        PassegerRole(Person* person): PersonRole(person) {};
         void displayRole(){
             std::cout << "Passenger" << std::endl;
         }
@@ -73,6 +96,7 @@ class PassegerRole: public PersonRole{
 
 class EmployeeRole: public PersonRole{
     public:
+        EmployeeRole(Person* person): PersonRole(person) {};
         void displayRole(){
             std::cout << "Employee" << std::endl;
         }
@@ -80,44 +104,61 @@ class EmployeeRole: public PersonRole{
 
 int main(){
 
-    Airline ootumlia("Ootumlia Airlines");
-    //Creating a new regular flight
-    RegularFlight* r1 = ootumlia.addRegularFlight("09:00", "111");
-    RegularFlight* r2 = ootumlia.addRegularFlight("10:00", "222");
-    RegularFlight* r3 = ootumlia.addRegularFlight("11:00", "333");
-    RegularFlight* r4 = ootumlia.addRegularFlight("12:00", "444");
-    //Creating a specific flight
-    r1->addSpecificFlight("20250101");
-    r1->addSpecificFlight("20250102");
-    r1->addSpecificFlight("20250103");
+    // Airline ootumlia("Ootumlia Airlines");
+    // //Creating a new regular flight
+    // RegularFlight* r1 = ootumlia.addRegularFlight("09:00", "111");
+    // RegularFlight* r2 = ootumlia.addRegularFlight("10:00", "222");
+    // RegularFlight* r3 = ootumlia.addRegularFlight("11:00", "333");
+    // RegularFlight* r4 = ootumlia.addRegularFlight("12:00", "444");
+    // //Creating a specific flight
+    // r1->addSpecificFlight("20250101");
+    // r1->addSpecificFlight("20250102");
+    // r1->addSpecificFlight("20250103");
 
-    r2->addSpecificFlight("20250101");
-    r2->addSpecificFlight("20250102");
-    r2->addSpecificFlight("20250103");
+    // r2->addSpecificFlight("20250101");
+    // r2->addSpecificFlight("20250102");
+    // r2->addSpecificFlight("20250103");
 
-    r3->addSpecificFlight("20250101");
-    r3->addSpecificFlight("20250102");
-    r3->addSpecificFlight("20250103");
+    // r3->addSpecificFlight("20250101");
+    // r3->addSpecificFlight("20250102");
+    // r3->addSpecificFlight("20250103");
 
-    //Listing all regular flights
-    ootumlia.listRegularFlights();  
+    // //Listing all regular flights
+    // ootumlia.listRegularFlights();  
 
-    std::string flightNumber;
-    std::cin >> flightNumber;   
+    // std::string flightNumber;
+    // std::cin >> flightNumber;   
 
+    // //Searching for a flight
+    // std::cout << ootumlia.findParticularRegular(flightNumber) << std::endl;
+
+
+    // //Modifying attributes of a flight
+    // std::cout << "修改後航班" << std::endl;
+    // r1->setTime("10:00");
+    // r1->setFlightNumber("112");
+
+    // ootumlia.listRegularFlights();  
     //Searching for a flight
-    std::cout << ootumlia.findParticularRegular(flightNumber) << std::endl;
+    // std::cout << ootumlia.findParticularRegular(flightNumber) << std::endl;
+
+    //Creating a new person
+    Person* p1 = new Person("John", "1234567890");
+    EmployeeRole* er1 = new EmployeeRole(p1);
+    
+    p1->addRole(er1);
+    p1->displayRoles();
+
+    std::cout << "--------------------------------" << std::endl;
+    Person* p2 = new Person("Nick", "0987654321");
+    EmployeeRole* er2 = new EmployeeRole(p2);
+    PassegerRole* pr2 = new PassegerRole(p2);
+    p2->addRole(er2);
+    p2->addRole(pr2);
+    p2->displayRoles();
 
 
-    //Modifying attributes of a flight
-    std::cout << "修改後航班" << std::endl;
-    r1->setTime("10:00");
-    r1->setFlightNumber("112");
-
-    ootumlia.listRegularFlights();  
 
 
-    //Searching for a flight
-    std::cout << ootumlia.findParticularRegular(flightNumber) << std::endl;
     return 0;
 }
