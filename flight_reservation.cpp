@@ -55,9 +55,10 @@ class Airline {
             }
         }
         //新增某航空公司的regular flight
-        void addRegularFlight(const std::string& time,const std::string& flightNumber){
+        RegularFlight* addRegularFlight(const std::string& time,const std::string& flightNumber){
             RegularFlight* r = new RegularFlight(time,flightNumber);
             regularFlights.push_back(r);
+            return r;
         };
 
         //利用班次號碼來查詢某班regular flight的時間
@@ -90,13 +91,16 @@ class Person {
 int main(){
 
     Airline ootumlia("Ootumlia Airlines");
-    ootumlia.addRegularFlight("09:00", "111");
-    ootumlia.addRegularFlight("10:00", "222");
-    ootumlia.addRegularFlight("11:00", "333");
-    ootumlia.addRegularFlight("12:00", "444");
-    ootumlia.addRegularFlight("13:00", "555");
-    ootumlia.addRegularFlight("14:00", "666");
-
+    
+    RegularFlight* r1 = ootumlia.addRegularFlight("09:00", "111");
+    RegularFlight* r2 = ootumlia.addRegularFlight("10:00", "222");
+    RegularFlight* r3 = ootumlia.addRegularFlight("11:00", "333");
+    RegularFlight* r4 = ootumlia.addRegularFlight("12:00", "444");
+    
+    r1->addSpecificFlight("20250101");
+    r2->addSpecificFlight("20250102");
+    r3->addSpecificFlight("20250103");
+    r4->addSpecificFlight("20250104");
 
     std::string flightNumber;
     std::cin >> flightNumber;   
