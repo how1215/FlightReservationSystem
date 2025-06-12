@@ -21,10 +21,21 @@ class Airline {
 };
 
 class PersonRole {
+    Person* person;
 
 
 
 
 
-    
+}; 
+
+class Person {
+    private:
+        std::string name;
+        std::string idNumber;
+
+    public:
+        Person(std::string name, std::string idNumber): name(name), idNumber(idNumber) {};
+        std::string getName() const { return name; }
+        std::string getIdNumber() const { return idNumber; }
 };
