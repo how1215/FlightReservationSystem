@@ -22,13 +22,7 @@ class RegularFlight {
         std::string flightNumber;
         std::vector<SpecificFlight* > specificFlights;
     public:
-        RegularFlight(const std::string& time,const std::string&  flightNumber): time(time), flightNumber(flightNumber) {};
-        ~RegularFlight(){
-            for(auto& s:specificFlights){
-                delete s;
-            }
-        }
-
+        RegularFlight(const std::string& time, const std::string& flightNumber): time(time), flightNumber(flightNumber) {};
         std::string getTime() const { return time; }
         void setTime(const std::string& time){this->time=time;}
         std::string getFlightNumber() const { return flightNumber; }
@@ -49,51 +43,22 @@ class Airline {
         std::string name;
         std::vector<RegularFlight* > regularFlights;
     public:
-        Airline(const std::string& name): name(name) {}
-        ~Airline(){
-            for(auto& r:regularFlights){
-                delete r;
-            }
-        }
-        //新增某航空公司的regular flight
-        RegularFlight* addRegularFlight(const std::string& time,const std::string& flightNumber){
-            RegularFlight* r = new RegularFlight(time,flightNumber);
-            regularFlights.push_back(r);
-            return r;
-        };
-
-        //利用班次號碼來查詢某班regular flight的時間
-        std::string findParticularRegular(const std::string& flightNumber){
-            for(auto& r:regularFlights){
-                if(r->getFlightNumber()==flightNumber){
-                    return r->getTime();
-                }
-            }
-            return "查無此航班";
-        }
-
-        //列出此航空公司的所有regular flight
-        void listRegularFlights(){
-            for(auto& r:regularFlights){
-                std::cout << r->getTime() << " " << r->getFlightNumber() << std::endl;
-            }
-        }
-
+        Airline(const std::string& name): name(name) {};
 };
 
 class PersonRole {
-    Person* person;
-    public:
-        PersonRole(Person* person): person(person) {}
-        virtual void displayRole() = 0;
+    
+
 }; 
 
 class Person {
     private:
         std::string name;
         std::string idNumber;
+        PersonRole* role;
+
     public:
-        Person(const std::string& name, const std::string& idNumber): name(name), idNumber(idNumber) {};
+        Person(const std::string& name, const std::string& idNumber, PersonRole* role): name(name), idNumber(idNumber), role(role) {};
         std::string getName() const { return name; }
         std::string getIdNumber() const { return idNumber; }
 };
