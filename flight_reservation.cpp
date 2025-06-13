@@ -62,7 +62,7 @@ class Person {
     private:
         std::string name;
         std::string idNumber;
-        //一個人可以有多個職位
+        //一個人最多可以有兩個職位
         std::vector<PersonRole* > roles;
 
     public:
@@ -72,6 +72,11 @@ class Person {
 
 
         void addRole(PersonRole* role){
+            //如果已經有兩個職位，則不能新增
+            if(roles.size() >= 2){
+                std::cout << "A person can have at most two roles" << std::endl;
+                exit(1);
+            }
             roles.push_back(role);
         }
 
@@ -144,15 +149,17 @@ int main(){
 
     //Creating a new person
     Person* p1 = new Person("John", "1234567890");
-    EmployeeRole* er1 = new EmployeeRole(p1);
+    PersonRole* pr1 = new EmployeeRole(p1);
     
-    p1->addRole(er1);
+    p1->addRole(pr1);
     p1->displayRoles();
 
     std::cout << "--------------------------------" << std::endl;
     Person* p2 = new Person("Nick", "0987654321");
-    EmployeeRole* er2 = new EmployeeRole(p2);
-    PassegerRole* pr2 = new PassegerRole(p2);
+
+    PersonRole* er2 = new EmployeeRole(p2);
+    PersonRole* pr2 = new PassegerRole(p2);
+
     p2->addRole(er2);
     p2->addRole(pr2);
     p2->displayRoles();
