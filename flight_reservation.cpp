@@ -5,6 +5,7 @@
 //Forward declaration
 class RegularFlight;
 class Person;
+class PersonRole;
 
 class SpecificFlight{
         private:
@@ -58,6 +59,34 @@ class PersonRole {
         virtual void displayRole() = 0;
 }; 
 
+//兩個職位class都繼承自PersonRole
+class PassengerRole: public PersonRole{
+    public:
+        PassengerRole(Person* person): PersonRole(person) {};
+        void displayRole(){
+            std::cout << "Passenger" << std::endl;
+        }
+};
+
+class EmployeeRole: public PersonRole{
+    private:
+        std::string jobFunction;
+        EmployeeRole* supervisor;
+    public:
+        EmployeeRole(Person* person, const std::string& jobFunction): PersonRole(person), jobFunction(jobFunction) {};
+        void displayRole(){
+            std::cout << "Employee" << std::endl;
+        }
+        
+        //設定直屬上司
+        void setSupervisor(EmployeeRole* supervisor){
+            this->supervisor = supervisor;
+        }
+
+        //顯示直屬上司
+        void displaySupervisor();
+};
+
 class Person {
     private:
         std::string name;
@@ -67,9 +96,9 @@ class Person {
 
     public:
         Person(const std::string& name, const std::string& idNumber): name(name), idNumber(idNumber) {};
+
         std::string getName() const { return name; }
         std::string getIdNumber() const { return idNumber; }
-
 
         void addRole(PersonRole* role){
             //如果已經有兩個職位，則不能新增
@@ -77,36 +106,45 @@ class Person {
                 std::cout << "A person can have at most two roles" << std::endl;
                 exit(1);
             }
-            roles.push_back(role);
+            if (roles.size() == 1) {
+                // 當已有一個角色時，檢查是否與新角色為相同類別
+                if (typeid(*role) == typeid(*roles.front())) {
+                    std::cout << "A person cannot have duplicate role types." << std::endl;
+                    exit(1);
+                }
+            }
+                roles.push_back(role);
         }
 
         //顯示這位使用者的所有職位
         void displayRoles() const {
-            std::cout << name << " (" << idNumber << ") has roles :\n";
+            std::cout << name << " (" << idNumber << ") has roles :" << std::endl;
             for (const auto& role : roles) {
                 role->displayRole();
             }
         }
-    };
 
-
-//兩個職位class都繼承自PersonRole
-class PassegerRole: public PersonRole{
-    public:
-        PassegerRole(Person* person): PersonRole(person) {};
-        void displayRole(){
-            std::cout << "Passenger" << std::endl;
+        //顯示直屬上司
+        void displaySupervisor(){
+            std::cout<<name<<" has supervisor:"<<std::endl;
+            for (auto& role : roles) {
+                EmployeeRole* employeeRole = dynamic_cast<EmployeeRole*>(role);
+                if(employeeRole != nullptr){
+                    employeeRole->displaySupervisor();
+                }
+            }
         }
 };
 
-class EmployeeRole: public PersonRole{
-    public:
-        EmployeeRole(Person* person): PersonRole(person) {};
-        void displayRole(){
-            std::cout << "Employee" << std::endl;
-        }
-};
-
+// 在 Person 類別定義之後實現 displaySupervisor來避免circular dependency
+void EmployeeRole::displaySupervisor(){
+    if(supervisor == nullptr){
+        std::cout << "No supervisor" << std::endl;
+    }else{
+        Person* supervisorPerson = supervisor->getPerson();
+        std::cout << "Supervisor: " << supervisorPerson->getName() << std::endl;
+    }
+}
 int main(){
 
     // Airline ootumlia("Ootumlia Airlines");
@@ -149,20 +187,39 @@ int main(){
 
     //Creating a new person
     Person* p1 = new Person("John", "1234567890");
-    PersonRole* pr1 = new EmployeeRole(p1);
-    
+    PersonRole* pr1 = new EmployeeRole(p1,"Manager");
     p1->addRole(pr1);
     p1->displayRoles();
 
     std::cout << "--------------------------------" << std::endl;
+
     Person* p2 = new Person("Nick", "0987654321");
-
-    PersonRole* er2 = new EmployeeRole(p2);
-    PersonRole* pr2 = new PassegerRole(p2);
-
+    PersonRole* er2 = new EmployeeRole(p2,"Manager");
+    PersonRole* pr2 = new PassengerRole(p2);
     p2->addRole(er2);
     p2->addRole(pr2);
     p2->displayRoles();
+
+    std::cout << "--------------------------------" << std::endl;
+
+    Person* p3 = new Person("Tom", "1111111111");
+    PersonRole* er3 = new EmployeeRole(p3,"Pilot");
+    PersonRole* pr3 = new PassengerRole(p3);
+    
+
+    p3->addRole(er3);
+    p3->addRole(pr3);
+    p3->displayRoles();
+
+
+
+
+    std::cout << "--------------------------------" << std::endl;
+    p1->displaySupervisor();
+    p2->displaySupervisor();
+    p3->displaySupervisor();
+
+
 
 
 
