@@ -32,10 +32,19 @@ class RegularFlight {
         std::vector<SpecificFlight* > getSpecificFlights() const { return specificFlights; }
 
         //新增Specific Flight
-        void addSpecificFlight(const std::string& date){
+        SpecificFlight* addSpecificFlight(const std::string& date){
             SpecificFlight* s = new SpecificFlight(date,this);
             //將新增的specific flight 儲存起來
             specificFlights.push_back(s);
+            return s;
+        }
+
+        //顯示此regular flight所有specific flight
+        void listSpecificFlights() const {
+            std::cout << "Specific flights of " << flightNumber << ":" << std::endl;
+            for (const auto& specificFlight : specificFlights) {
+                std::cout << "Date: " << specificFlight->getDate() << std::endl;
+            }
         }
 };
 
@@ -46,6 +55,38 @@ class Airline {
         std::vector<RegularFlight* > regularFlights;
     public:
         Airline(const std::string& name): name(name) {};
+        std::string getName() const { return name; }
+        void setName(const std::string& name){this->name=name;}
+        std::vector<RegularFlight* > getRegularFlights() const { return regularFlights; }
+        
+        //新增Specific Flight
+        RegularFlight* addRegularFlight(const std::string& time, const std::string& flightNumber){
+            RegularFlight* r = new RegularFlight(time,flightNumber);
+            //將新增的regular flight 儲存起來
+            regularFlights.push_back(r);
+            return r;
+        }
+
+        //顯示此航空公司所有regular flight
+        void listRegularFlights() const {
+            std::cout << "Regular flights of " << name << ":" << std::endl;
+            for (const auto& regularFlight : regularFlights) {
+                std::cout << "Flight Number: " << regularFlight->getFlightNumber() << " Time: " << regularFlight->getTime() << std::endl;
+            }
+        }
+
+        //用航班號碼搜尋特定regular flight
+        RegularFlight* findParticularRegular(const std::string& flightNumber) const {
+            for (const auto& regularFlight : regularFlights) {
+                if (regularFlight->getFlightNumber() == flightNumber) {
+                    return regularFlight;
+                }else{
+                    std::cout << "No such flight" << std::endl;
+                    exit(1);
+                }
+            }
+            return nullptr;
+        }
 };
 
 class PersonRole {
@@ -53,10 +94,12 @@ class PersonRole {
         Person* person;
     public:
         PersonRole(Person* person): person(person) {};
+        virtual ~PersonRole() = default;
         Person* getPerson() const { return person; }
         void setPerson(Person* person){this->person=person;}
         //純虛函數供子類別繼承後override
         virtual void displayRole() = 0;
+
 }; 
 
 //兩個職位class都繼承自PersonRole
@@ -79,12 +122,17 @@ class EmployeeRole: public PersonRole{
         }
         
         //設定直屬上司
-        void setSupervisor(EmployeeRole* supervisor){
-            this->supervisor = supervisor;
+        void setSupervisor  (EmployeeRole* supervisor){
+            if(this->supervisor == nullptr){
+                this->supervisor = supervisor;
+            }else{
+                std::cout << "A person can have at most one supervisor" << std::endl;
+                exit(1);
+            }
         }
 
-        //顯示直屬上司
-        void displaySupervisor();
+        //顯示直屬上司，實作於最後
+        void displaySupervisor ();                                                                                                                              
 };
 
 class Person {
@@ -136,93 +184,93 @@ class Person {
         }
 };
 
-// 在 Person 類別定義之後實現 displaySupervisor來避免circular dependency
+// EmployeeRole的displaySupervisor實作
 void EmployeeRole::displaySupervisor(){
     if(supervisor == nullptr){
-        std::cout << "No supervisor" << std::endl;
+        std::cout << "No supervisor" << std::endl<< std::endl;
     }else{
         Person* supervisorPerson = supervisor->getPerson();
-        std::cout << "Supervisor: " << supervisorPerson->getName() << std::endl;
+        std::cout << "Supervisor: " << supervisorPerson->getName() << std::endl<< std::endl;
     }
 }
 int main(){
 
-    // Airline ootumlia("Ootumlia Airlines");
-    // //Creating a new regular flight
-    // RegularFlight* r1 = ootumlia.addRegularFlight("09:00", "111");
-    // RegularFlight* r2 = ootumlia.addRegularFlight("10:00", "222");
-    // RegularFlight* r3 = ootumlia.addRegularFlight("11:00", "333");
-    // RegularFlight* r4 = ootumlia.addRegularFlight("12:00", "444");
-    // //Creating a specific flight
-    // r1->addSpecificFlight("20250101");
-    // r1->addSpecificFlight("20250102");
-    // r1->addSpecificFlight("20250103");
+    Airline ncku("NCKU Airlines");
+    //Creating a new regular flight
+    RegularFlight* r1 = ncku.addRegularFlight("09:00", "111");
+    RegularFlight* r2 = ncku.addRegularFlight("10:00", "222");
+    RegularFlight* r3 = ncku.addRegularFlight("11:00", "333");
+    RegularFlight* r4 = ncku.addRegularFlight("12:00", "444");
+    //Creating a specific flight
+    SpecificFlight* s1 = r1->addSpecificFlight("20250101");
+    SpecificFlight* s2 = r1->addSpecificFlight("20250102");
+    SpecificFlight* s3 = r1->addSpecificFlight("20250103");
 
-    // r2->addSpecificFlight("20250101");
-    // r2->addSpecificFlight("20250102");
-    // r2->addSpecificFlight("20250103");
+    SpecificFlight* s4 = r2->addSpecificFlight("20250101");
+    SpecificFlight* s5 = r2->addSpecificFlight("20250102");
+    SpecificFlight* s6 = r2->addSpecificFlight("20250103");
 
-    // r3->addSpecificFlight("20250101");
-    // r3->addSpecificFlight("20250102");
-    // r3->addSpecificFlight("20250103");
+    SpecificFlight* s7 = r3->addSpecificFlight("20250101");
+    SpecificFlight* s8 = r3->addSpecificFlight("20250102");
+    SpecificFlight* s9 = r3->addSpecificFlight("20250103");
 
-    // //Listing all regular flights
-    // ootumlia.listRegularFlights();  
+    //Listing all regular flights
+    ncku.listRegularFlights();  
 
-    // std::string flightNumber;
-    // std::cin >> flightNumber;   
+    //Listing all specific flights
+    r1->listSpecificFlights();
+    r2->listSpecificFlights();
+    r3->listSpecificFlights();
 
-    // //Searching for a flight
-    // std::cout << ootumlia.findParticularRegular(flightNumber) << std::endl;
+    //Modifying attributes of a flight
+    std::cout << "修改後航班" << std::endl;
+    r1->setTime("10:00");
+    r1->setFlightNumber("112");
 
+    ncku.listRegularFlights();  
 
-    // //Modifying attributes of a flight
-    // std::cout << "修改後航班" << std::endl;
-    // r1->setTime("10:00");
-    // r1->setFlightNumber("112");
+    std::string flightNumber;
+    std::cout << "請輸入航班號碼:";
+    std::cin >> flightNumber;   
 
-    // ootumlia.listRegularFlights();  
     //Searching for a flight
-    // std::cout << ootumlia.findParticularRegular(flightNumber) << std::endl;
-
-    //Creating a new person
-    Person* p1 = new Person("John", "1234567890");
-    PersonRole* pr1 = new EmployeeRole(p1,"Manager");
-    p1->addRole(pr1);
-    p1->displayRoles();
+    std::cout << "航班" << flightNumber << "的時間是: " << ncku.findParticularRegular(flightNumber)->getTime() << std::endl;
 
     std::cout << "--------------------------------" << std::endl;
 
+    //Creating a new person (crew member)
+    Person* p1 = new Person("John", "1234567890");
+    EmployeeRole* er1 = new EmployeeRole(p1,"CEO");
+    p1->addRole(er1);
+    p1->displayRoles();
+
     Person* p2 = new Person("Nick", "0987654321");
-    PersonRole* er2 = new EmployeeRole(p2,"Manager");
-    PersonRole* pr2 = new PassengerRole(p2);
+    EmployeeRole* er2 = new EmployeeRole(p2,"Manager");
+    PassengerRole* pr2 = new PassengerRole(p2);
     p2->addRole(er2);
     p2->addRole(pr2);
     p2->displayRoles();
 
-    std::cout << "--------------------------------" << std::endl;
-
     Person* p3 = new Person("Tom", "1111111111");
-    PersonRole* er3 = new EmployeeRole(p3,"Pilot");
-    PersonRole* pr3 = new PassengerRole(p3);
-    
+    EmployeeRole* er3 = new EmployeeRole(p3,"Pilot");
+    PassengerRole* pr3 = new PassengerRole(p3);
+
+    er2->setSupervisor(er1);
+    er3->setSupervisor(er2);
 
     p3->addRole(er3);
     p3->addRole(pr3);
     p3->displayRoles();
 
-
-
-
-    std::cout << "--------------------------------" << std::endl;
     p1->displaySupervisor();
     p2->displaySupervisor();
     p3->displaySupervisor();
 
-
-
-
-
+    std::cout << "--------------------------------" << std::endl;
+    //Creating a new person (passenger)
+    Person* p4 = new Person("Curry", "3030303030");
+    PassengerRole* pr4 = new PassengerRole(p4);
+    p4->addRole(pr4);
 
     return 0;
 }
