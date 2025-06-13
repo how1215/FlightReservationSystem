@@ -150,7 +150,7 @@ class EmployeeRole: public PersonRole{
         std::string jobFunction;
         EmployeeRole* supervisor;
     public:
-        EmployeeRole(const std::string& jobFunction): jobFunction(jobFunction) {};
+        EmployeeRole(const std::string& jobFunction): jobFunction(jobFunction), supervisor(nullptr) {};
         
         //設定直屬上司
         void setSupervisor  (EmployeeRole* supervisor){
@@ -193,12 +193,14 @@ class Person {
             }
             if (roles.size() == 1) {
                 // 當已有一個角色時，檢查是否與新角色為相同類別
-                if (typeid(*role) == typeid(*roles.front())) {
+                PersonRole* existingRole = roles.front();
+                if (typeid(*role) == typeid(*existingRole)) {
                     std::cout << "A person cannot have duplicate role types." << std::endl;
                     exit(1);
                 }
             }
                 roles.push_back(role);
+                role->setPerson(this);
         }
 
         //顯示這位使用者的所有職位
