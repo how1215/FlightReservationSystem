@@ -18,6 +18,7 @@ class SpecificFlight{
             std::string date;
             RegularFlight* regularFlight;
             std::vector<Booking* > bookings;
+            std::vector<EmployeeRole* > dutyMembers;
         public:
             SpecificFlight(const std::string& date,RegularFlight* regularFlight):date(date),regularFlight(regularFlight){}        
 
@@ -25,14 +26,15 @@ class SpecificFlight{
             RegularFlight* getRegularFlight() const { return regularFlight; }
 
             //新增這特殊班次可訂位的座位
-            void addBooking(Booking* booking){
-                bookings.push_back(booking);
-                booking->setSpecificFlight(this);
-                booking->setRegularFlight(regularFlight);
-            }
+            void addBooking(Booking* booking);
 
+            //新增會在Specific Flight上工作的機組人員
+            void addDutyMember(EmployeeRole* person);
             //顯示這特殊班次可訂位的座位
             void listBookings();
+
+            //顯示這特殊班次上的機組人員
+            void listDutyMembers();
 };
  
 class RegularFlight {
@@ -122,9 +124,7 @@ class PersonRole {
         virtual ~PersonRole() = default;
         Person* getPerson() const { return person; }
         void setPerson(Person* person){this->person=person;}
-        //純虛函數供子類別繼承後override
-        virtual void displayRole() = 0;
-
+        virtual void displayRole() const = 0;  // 添加純虛擬函數
 }; 
 
 //兩個職位class都繼承自PersonRole
@@ -133,14 +133,17 @@ class PassengerRole: public PersonRole{
         std::vector<Booking* > bookings;
     public:
         PassengerRole(Person* person): PersonRole(person) {};
-        void displayRole(){
-            std::cout << "Passenger" << std::endl;
-        }
+
         void bookSeat(Booking* booking){
             bookings.push_back(booking);
         }
         //列出訂票紀錄
-        void listBookings();
+        void listAllReservations();
+        
+        // 實現 displayRole 函數
+        void displayRole() const override {
+            std::cout << "Passenger" << std::endl;
+        }
 };
 
 class EmployeeRole: public PersonRole{
@@ -149,9 +152,6 @@ class EmployeeRole: public PersonRole{
         EmployeeRole* supervisor;
     public:
         EmployeeRole(Person* person, const std::string& jobFunction): PersonRole(person), jobFunction(jobFunction) {};
-        void displayRole(){
-            std::cout << "Employee" << std::endl;
-        }
         
         //設定直屬上司
         void setSupervisor  (EmployeeRole* supervisor){
@@ -162,9 +162,15 @@ class EmployeeRole: public PersonRole{
                 exit(1);
             }
         }
+        std::string getJobFunction() const { return jobFunction; }
 
         //顯示直屬上司，實作於最後
-        void displaySupervisor ();                                                                                                                              
+        void displaySupervisor ();
+
+        // 實現 displayRole 函數
+        void displayRole() const override {
+            std::cout << "Employee - " << jobFunction << std::endl;
+        }
 };
 
 class Person {
@@ -223,7 +229,7 @@ class Booking{
         SpecificFlight* specificFlight;
 
     public:
-        Booking(const std::string& seatNumber, RegularFlight* regularFlight, SpecificFlight* specificFlight): seatNumber(seatNumber), regularFlight(regularFlight), specificFlight(specificFlight) {};
+        Booking(const std::string& seatNumber): seatNumber(seatNumber) {};
 
         std::string getSeatNumber() const { return seatNumber; }
         void setSeatNumber(const std::string& seatNumber){this->seatNumber=seatNumber;}
@@ -252,21 +258,44 @@ void Airline::listCrewMembers(){
 }
 
 //PassengerRole的listBookings實作
-void PassengerRole::listBookings(){
-    std::cout << "Bookings of " << getPerson()->getName() << ":" << std::endl;
+void PassengerRole::listAllReservations(){
+    std::cout << "--------------------------------" << std::endl;
+    std::cout << "Bookings of " << getPerson()->getName() << ":" << std::endl<< std::endl;
     for (const auto& booking : bookings) {
-        std::cout << "Flight Number: " << booking->getRegularFlight()->getFlightNumber() << std::endl<< booking->getRegularFlight()->getTime() << std::endl;
+        std::cout << "Flight Number: " << booking->getRegularFlight()->getFlightNumber() << std::endl<< "Time: " << booking->getRegularFlight()->getTime() << std::endl;
         std::cout << "Seat Number: " << booking->getSeatNumber() << std::endl<< std::endl;
     }
+    std::cout << "--------------------------------" << std::endl<< std::endl;
 }
 //SpecificFlight的listBookings實作
 void SpecificFlight::listBookings(){
-    std::cout << "Bookings of " << date << ":" << std::endl;
+    std::cout << "--------------------------------" << std::endl;
+    std::cout << "Bookings of " << date << ":" << std::endl<< std::endl;
     for (const auto& booking : bookings) {
-        std::cout << "Seat Number: " << booking->getSeatNumber() << std::endl<< std::endl;
+        std::cout << "Seat Number: " << booking->getSeatNumber() <<std::endl;
     }
+    std::cout << "--------------------------------" << std::endl;
 }
-
+//SpecificFlight的addBooking實作
+void SpecificFlight::addBooking(Booking* booking){
+    bookings.push_back(booking);
+    booking->setSpecificFlight(this);
+    booking->setRegularFlight(regularFlight);
+}
+//SpecificFlight的addDutyMember實作
+void SpecificFlight::addDutyMember(EmployeeRole* person){
+    dutyMembers.push_back(person);
+}
+//SpecificFlight的listDutyMembers實作
+void SpecificFlight::listDutyMembers(){
+    std::cout << "--------------------------------" << std::endl;
+    std::cout << "Duty members of " << date << ":" << std::endl<< std::endl;
+    for (const auto& dutyMember : dutyMembers) {
+        std::cout << "Name: " << dutyMember->getPerson()->getName() << " /ID: " << dutyMember->getPerson()->getIdNumber()<< std::endl;
+        std::cout << "Job Function: " << dutyMember->getJobFunction() << std::endl;
+    }
+    std::cout << "--------------------------------" << std::endl<< std::endl;
+}
 //主程式
 int main(){
 
@@ -357,23 +386,57 @@ int main(){
     Airline ncku("NCKU Airlines");
     //建立regular flight
     RegularFlight* r1 = ncku.addRegularFlight("09:00", "111");
+    RegularFlight* r2 = ncku.addRegularFlight("10:00", "222");
     //建立specific flight
     SpecificFlight* s1 = r1->addSpecificFlight("20250101");
-    //建立booking
-    Booking* b1 = new Booking("1A");
-    //將booking加入specific flight
-    s1->addBooking(b1);
-    //列出specific flight可訂位的座位
-    s1->listBookings();
-    //建立人物
-    Person* p1 = new Person("Nick", "1234567890");
-    //將人物加上乘客腳色
-    PassengerRole* pr1 = new PassengerRole(p1);
-    //乘客訂位
-    pr1->bookSeat(b1);    
+    SpecificFlight* s2 = r2->addSpecificFlight("20250108");
+    //建立specific flight機組人員
+    Person* p1 = new Person("John", "1234567890");
+    Person* p2 = new Person("Nick", "0987654321");
+    Person* p3 = new Person("Tom", "1111111111");
+    EmployeeRole* er1 = new EmployeeRole(p1,"Pilot");
+    EmployeeRole* er2 = new EmployeeRole(p2,"Co-Pilot");
+    EmployeeRole* er3 = new EmployeeRole(p3,"Flight Attendant");
+    
+    //設定值班人員
+    s1->addDutyMember(er1);
+    s1->addDutyMember(er2);
+    s1->addDutyMember(er3);
+    s2->addDutyMember(er1);
+    s2->addDutyMember(er2);
+    s2->addDutyMember(er3);
+    //列出specific flight機組人員
+    s1->listDutyMembers();
+    s2->listDutyMembers();
+    // //建立specific flight 的booking
+    // Booking* b1 = new Booking("1A");
+    // Booking* b2 = new Booking("1B");
+    // Booking* b3 = new Booking("1C");
 
-    //列出乘客訂票紀錄
-    pr1->listBookings();
+    // Booking* b4 = new Booking("1A");
+    // Booking* b5 = new Booking("1B");
+    // Booking* b6 = new Booking("1C");
+    // //將booking加入specific flight
+    // s1->addBooking(b1);
+    // s1->addBooking(b2);
+    // s1->addBooking(b3);
+    // s2->addBooking(b4);
+    // s2->addBooking(b5);
+    // s2->addBooking(b6);
+    // //列出specific flight可訂位的座位
+    // s1->listBookings();
+    // s2->listBookings();
+    // //建立人物
+    // Person* p1 = new Person("Nick", "1234567890");
+    // //將人物加上乘客腳色
+    // PassengerRole* pr1 = new PassengerRole(p1);
+    // //乘客訂位
+    // pr1->bookSeat(b1);    
+    // pr1->bookSeat(b4);
+    // pr1->bookSeat(b5);
+    // pr1->bookSeat(b6);
+    // //列出乘客訂票紀錄
+    // pr1->listAllReservations();
 
 
     return 0;
