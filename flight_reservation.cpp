@@ -200,7 +200,6 @@ int main(){
     RegularFlight* r1 = ncku.addRegularFlight("09:00", "111");
     RegularFlight* r2 = ncku.addRegularFlight("10:00", "222");
     RegularFlight* r3 = ncku.addRegularFlight("11:00", "333");
-    RegularFlight* r4 = ncku.addRegularFlight("12:00", "444");
     //Creating a specific flight
     SpecificFlight* s1 = r1->addSpecificFlight("20250101");
     SpecificFlight* s2 = r1->addSpecificFlight("20250102");
