@@ -3,19 +3,36 @@
 #include <vector>
 
 //Forward declaration
-class RegularFlight;
 class Person;
 class PersonRole;
+class PassengerRole;
+class EmployeeRole;
+class Airline;
+class RegularFlight;
+class SpecificFlight;
+class Booking;
+
 
 class SpecificFlight{
         private:
             std::string date;
             RegularFlight* regularFlight;
+            std::vector<Booking* > bookings;
         public:
             SpecificFlight(const std::string& date,RegularFlight* regularFlight):date(date),regularFlight(regularFlight){}        
 
             std::string getDate() const { return date; }
             RegularFlight* getRegularFlight() const { return regularFlight; }
+
+            //新增這特殊班次可訂位的座位
+            void addBooking(Booking* booking){
+                bookings.push_back(booking);
+                booking->setSpecificFlight(this);
+                booking->setRegularFlight(regularFlight);
+            }
+
+            //顯示這特殊班次可訂位的座位
+            void listBookings();
 };
  
 class RegularFlight {
@@ -47,7 +64,6 @@ class RegularFlight {
             }
         }
 };
-
 
 class Airline {
     private:
@@ -82,11 +98,10 @@ class Airline {
             for (const auto& regularFlight : regularFlights) {
                 if (regularFlight->getFlightNumber() == flightNumber) {
                     return regularFlight;
-                }else{
-                    std::cout << "No such flight" << std::endl;
-                    exit(1);
                 }
             }
+            std::cout << "No such flight" << std::endl;
+            exit(1);
             return nullptr;
         }
 
@@ -96,12 +111,7 @@ class Airline {
         }
 
         //顯示此航空公司所有crew member
-        void listCrewMembers() const {
-            std::cout << "Crew members of " << name << ":" << std::endl;
-            for (const auto& crewMember : crewMembers) {
-                std::cout << "Name: " << crewMember->getName() << " ID: " << crewMember->getIdNumber() << std::endl;
-            }
-        }
+        void listCrewMembers();
 };
 
 class PersonRole {
@@ -119,11 +129,18 @@ class PersonRole {
 
 //兩個職位class都繼承自PersonRole
 class PassengerRole: public PersonRole{
+    private:
+        std::vector<Booking* > bookings;
     public:
         PassengerRole(Person* person): PersonRole(person) {};
         void displayRole(){
             std::cout << "Passenger" << std::endl;
         }
+        void bookSeat(Booking* booking){
+            bookings.push_back(booking);
+        }
+        //列出訂票紀錄
+        void listBookings();
 };
 
 class EmployeeRole: public PersonRole{
@@ -199,6 +216,24 @@ class Person {
         }
 };
 
+class Booking{
+    private:
+        std::string seatNumber;
+        RegularFlight* regularFlight;
+        SpecificFlight* specificFlight;
+
+    public:
+        Booking(const std::string& seatNumber, RegularFlight* regularFlight, SpecificFlight* specificFlight): seatNumber(seatNumber), regularFlight(regularFlight), specificFlight(specificFlight) {};
+
+        std::string getSeatNumber() const { return seatNumber; }
+        void setSeatNumber(const std::string& seatNumber){this->seatNumber=seatNumber;}
+
+        SpecificFlight* getSpecificFlight() const { return specificFlight; }
+        RegularFlight* getRegularFlight() const { return regularFlight; }
+        void setSpecificFlight(SpecificFlight* specificFlight){this->specificFlight=specificFlight;}
+        void setRegularFlight(RegularFlight* regularFlight){this->regularFlight=regularFlight;}
+};
+
 // EmployeeRole的displaySupervisor實作
 void EmployeeRole::displaySupervisor(){
     if(supervisor == nullptr){
@@ -208,89 +243,137 @@ void EmployeeRole::displaySupervisor(){
         std::cout << "Supervisor: " << supervisorPerson->getName() << std::endl<< std::endl;
     }
 }
+//Airline的listCrewMembers實作
+void Airline::listCrewMembers(){
+    std::cout << "Crew members of " << name << ":" << std::endl;
+    for (const auto& crewMember : crewMembers) {
+        std::cout << "Name: " << crewMember->getName() << " /ID: " << crewMember->getIdNumber()<< std::endl;
+    }
+}
+
+//PassengerRole的listBookings實作
+void PassengerRole::listBookings(){
+    std::cout << "Bookings of " << getPerson()->getName() << ":" << std::endl;
+    for (const auto& booking : bookings) {
+        std::cout << "Flight Number: " << booking->getRegularFlight()->getFlightNumber() << std::endl<< booking->getRegularFlight()->getTime() << std::endl;
+        std::cout << "Seat Number: " << booking->getSeatNumber() << std::endl<< std::endl;
+    }
+}
+//SpecificFlight的listBookings實作
+void SpecificFlight::listBookings(){
+    std::cout << "Bookings of " << date << ":" << std::endl;
+    for (const auto& booking : bookings) {
+        std::cout << "Seat Number: " << booking->getSeatNumber() << std::endl<< std::endl;
+    }
+}
+
+//主程式
 int main(){
 
+    // Airline ncku("NCKU Airlines");
+    // //Creating a new regular flight
+    // RegularFlight* r1 = ncku.addRegularFlight("09:00", "111");
+    // RegularFlight* r2 = ncku.addRegularFlight("10:00", "222");
+    // RegularFlight* r3 = ncku.addRegularFlight("11:00", "333");
+    // //Creating a specific flight
+    // SpecificFlight* s1 = r1->addSpecificFlight("20250101");
+    // SpecificFlight* s2 = r1->addSpecificFlight("20250102");
+    // SpecificFlight* s3 = r1->addSpecificFlight("20250103");
+
+    // SpecificFlight* s4 = r2->addSpecificFlight("20250101");
+    // SpecificFlight* s5 = r2->addSpecificFlight("20250102");
+    // SpecificFlight* s6 = r2->addSpecificFlight("20250103");
+
+    // SpecificFlight* s7 = r3->addSpecificFlight("20250101");
+    // SpecificFlight* s8 = r3->addSpecificFlight("20250102");
+    // SpecificFlight* s9 = r3->addSpecificFlight("20250103");
+
+    // //Listing all regular flights
+    // ncku.listRegularFlights();  
+
+    // //Listing all specific flights
+    // r1->listSpecificFlights();
+    // r2->listSpecificFlights();
+    // r3->listSpecificFlights();
+
+    // //Modifying attributes of a flight
+    // std::cout << "修改後航班" << std::endl;
+    // r1->setTime("10:00");
+    // r1->setFlightNumber("112");
+
+    // ncku.listRegularFlights();  
+
+    // std::string flightNumber;
+    // std::cout << "請輸入航班號碼:";
+    // std::cin >> flightNumber;   
+
+    // //Searching for a flight
+    // std::cout << "航班" << flightNumber << "的時間是: " << ncku.findParticularRegular(flightNumber)->getTime() << std::endl;
+
+    // std::cout << "--------------------------------" << std::endl<< std::endl;
+
+    // //Creating a new person (crew member)
+    // Person* p1 = new Person("John", "1234567890");
+    // EmployeeRole* er1 = new EmployeeRole(p1,"CEO");
+    // p1->addRole(er1);
+    // p1->displayRoles();
+    // Person* p2 = new Person("Nick", "0987654321");
+    // EmployeeRole* er2 = new EmployeeRole(p2,"Manager");
+    // PassengerRole* pr2 = new PassengerRole(p2);
+    // p2->addRole(er2);
+    // p2->addRole(pr2);
+    // p2->displayRoles();
+    // Person* p3 = new Person("Tom", "1111111111");
+    // EmployeeRole* er3 = new EmployeeRole(p3,"Pilot");
+    // PassengerRole* pr3 = new PassengerRole(p3);
+
+    // //Creating a new person (passenger)
+    // Person* p4 = new Person("Curry", "3030303030");
+    // PassengerRole* pr4 = new PassengerRole(p4);
+    // p4->addRole(pr4);
+
+    // er2->setSupervisor(er1);
+    // er3->setSupervisor(er2);
+
+    // p3->addRole(er3);
+    // p3->addRole(pr3);
+    // p3->displayRoles();
+
+    // p1->displaySupervisor();
+    // p2->displaySupervisor();
+    // p3->displaySupervisor();
+
+    // std::cout << "--------------------------------" << std::endl;
+
+    // ncku.addCrewMember(p1);
+    // ncku.addCrewMember(p2);
+    // ncku.addCrewMember(p3);
+
+
+    // ncku.listCrewMembers();
+
+    //訂位流程
+    //建立航空公司
     Airline ncku("NCKU Airlines");
-    //Creating a new regular flight
+    //建立regular flight
     RegularFlight* r1 = ncku.addRegularFlight("09:00", "111");
-    RegularFlight* r2 = ncku.addRegularFlight("10:00", "222");
-    RegularFlight* r3 = ncku.addRegularFlight("11:00", "333");
-    //Creating a specific flight
+    //建立specific flight
     SpecificFlight* s1 = r1->addSpecificFlight("20250101");
-    SpecificFlight* s2 = r1->addSpecificFlight("20250102");
-    SpecificFlight* s3 = r1->addSpecificFlight("20250103");
+    //建立booking
+    Booking* b1 = new Booking("1A");
+    //將booking加入specific flight
+    s1->addBooking(b1);
+    //列出specific flight可訂位的座位
+    s1->listBookings();
+    //建立人物
+    Person* p1 = new Person("Nick", "1234567890");
+    //將人物加上乘客腳色
+    PassengerRole* pr1 = new PassengerRole(p1);
+    //乘客訂位
+    pr1->bookSeat(b1);    
 
-    SpecificFlight* s4 = r2->addSpecificFlight("20250101");
-    SpecificFlight* s5 = r2->addSpecificFlight("20250102");
-    SpecificFlight* s6 = r2->addSpecificFlight("20250103");
-
-    SpecificFlight* s7 = r3->addSpecificFlight("20250101");
-    SpecificFlight* s8 = r3->addSpecificFlight("20250102");
-    SpecificFlight* s9 = r3->addSpecificFlight("20250103");
-
-    //Listing all regular flights
-    ncku.listRegularFlights();  
-
-    //Listing all specific flights
-    r1->listSpecificFlights();
-    r2->listSpecificFlights();
-    r3->listSpecificFlights();
-
-    //Modifying attributes of a flight
-    std::cout << "修改後航班" << std::endl;
-    r1->setTime("10:00");
-    r1->setFlightNumber("112");
-
-    ncku.listRegularFlights();  
-
-    std::string flightNumber;
-    std::cout << "請輸入航班號碼:";
-    std::cin >> flightNumber;   
-
-    //Searching for a flight
-    std::cout << "航班" << flightNumber << "的時間是: " << ncku.findParticularRegular(flightNumber)->getTime() << std::endl;
-
-    std::cout << "--------------------------------" << std::endl;
-
-    //Creating a new person (crew member)
-    Person* p1 = new Person("John", "1234567890");
-    EmployeeRole* er1 = new EmployeeRole(p1,"CEO");
-    p1->addRole(er1);
-    p1->displayRoles();
-    Person* p2 = new Person("Nick", "0987654321");
-    EmployeeRole* er2 = new EmployeeRole(p2,"Manager");
-    PassengerRole* pr2 = new PassengerRole(p2);
-    p2->addRole(er2);
-    p2->addRole(pr2);
-    p2->displayRoles();
-    Person* p3 = new Person("Tom", "1111111111");
-    EmployeeRole* er3 = new EmployeeRole(p3,"Pilot");
-    PassengerRole* pr3 = new PassengerRole(p3);
-
-    //Creating a new person (passenger)
-    Person* p4 = new Person("Curry", "3030303030");
-    PassengerRole* pr4 = new PassengerRole(p4);
-    p4->addRole(pr4);
-
-    er2->setSupervisor(er1);
-    er3->setSupervisor(er2);
-
-    p3->addRole(er3);
-    p3->addRole(pr3);
-    p3->displayRoles();
-
-    p1->displaySupervisor();
-    p2->displaySupervisor();
-    p3->displaySupervisor();
-
-    std::cout << "--------------------------------" << std::endl;
-
-    ncku.addCrewMember(p1);
-    ncku.addCrewMember(p2);
-    ncku.addCrewMember(p3);
-
-
-    ncku.listCrewMembers();
+    //列出乘客訂票紀錄
+    pr1->listBookings();
 
 
     return 0;
