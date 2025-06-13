@@ -53,11 +53,13 @@ class Airline {
     private:
         std::string name;
         std::vector<RegularFlight* > regularFlights;
+        std::vector<Person* > crewMembers;
     public:
         Airline(const std::string& name): name(name) {};
         std::string getName() const { return name; }
         void setName(const std::string& name){this->name=name;}
         std::vector<RegularFlight* > getRegularFlights() const { return regularFlights; }
+        std::vector<Person* > getCrewMembers() const { return crewMembers; }
         
         //新增Specific Flight
         RegularFlight* addRegularFlight(const std::string& time, const std::string& flightNumber){
@@ -86,6 +88,19 @@ class Airline {
                 }
             }
             return nullptr;
+        }
+
+        //新增crew member
+        void addCrewMember(Person* person){
+            crewMembers.push_back(person);
+        }
+
+        //顯示此航空公司所有crew member
+        void listCrewMembers() const {
+            std::cout << "Crew members of " << name << ":" << std::endl;
+            for (const auto& crewMember : crewMembers) {
+                std::cout << "Name: " << crewMember->getName() << " ID: " << crewMember->getIdNumber() << std::endl;
+            }
         }
 };
 
@@ -242,17 +257,20 @@ int main(){
     EmployeeRole* er1 = new EmployeeRole(p1,"CEO");
     p1->addRole(er1);
     p1->displayRoles();
-
     Person* p2 = new Person("Nick", "0987654321");
     EmployeeRole* er2 = new EmployeeRole(p2,"Manager");
     PassengerRole* pr2 = new PassengerRole(p2);
     p2->addRole(er2);
     p2->addRole(pr2);
     p2->displayRoles();
-
     Person* p3 = new Person("Tom", "1111111111");
     EmployeeRole* er3 = new EmployeeRole(p3,"Pilot");
     PassengerRole* pr3 = new PassengerRole(p3);
+
+    //Creating a new person (passenger)
+    Person* p4 = new Person("Curry", "3030303030");
+    PassengerRole* pr4 = new PassengerRole(p4);
+    p4->addRole(pr4);
 
     er2->setSupervisor(er1);
     er3->setSupervisor(er2);
@@ -266,10 +284,14 @@ int main(){
     p3->displaySupervisor();
 
     std::cout << "--------------------------------" << std::endl;
-    //Creating a new person (passenger)
-    Person* p4 = new Person("Curry", "3030303030");
-    PassengerRole* pr4 = new PassengerRole(p4);
-    p4->addRole(pr4);
+
+    ncku.addCrewMember(p1);
+    ncku.addCrewMember(p2);
+    ncku.addCrewMember(p3);
+
+
+    ncku.listCrewMembers();
+
 
     return 0;
 }
