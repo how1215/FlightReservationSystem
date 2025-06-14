@@ -369,7 +369,19 @@ int main(){
     s1->addDutyMember(er1);
     s1->addDutyMember(er2);
     s1->addDutyMember(er3);
-
+    //利用航班號碼搜尋regular flight
+    RegularFlight* r2 = ncku.findParticularRegular("111");
+    //列出regular flight的航班號碼
+    std::cout << "--------------------------------" << std::endl;
+    std::cout << "Flight Number: " << r2->getFlightNumber() << std::endl;
+    std::cout << "--------------------------------" << std::endl;
+    //修改regular flight的航班時間
+    r2->setTime("10:00");
+    //列出regular flight的航班時間
+    std::cout << "--------------------------------" << std::endl;
+    std::cout << "Flight Number: " << r2->getFlightNumber() << std::endl;
+    std::cout << "Time: " << r2->getTime() << std::endl;
+    std::cout << "--------------------------------" << std::endl;
     //列出specific flight的機組人員
     s1->listDutyMembers();
     //列出航空公司所有常規航班
