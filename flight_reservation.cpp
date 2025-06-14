@@ -290,9 +290,9 @@ void SpecificFlight::addDutyMember(EmployeeRole* person){
 //SpecificFlight的listDutyMembers實作
 void SpecificFlight::listDutyMembers(){
     std::cout << "--------------------------------" << std::endl;
-    std::cout << "Duty members of " << date << ":" << std::endl<< std::endl;
+    std::cout << "Duty members of flight " << regularFlight->getFlightNumber() << " on " << date << ":" << std::endl<< std::endl;
     for (const auto& dutyMember : dutyMembers) {
-        std::cout << "Name: " << dutyMember->getPerson()->getName() << " /ID: " << dutyMember->getPerson()->getIdNumber()<< std::endl;
+        std::cout << "Name: " << dutyMember->getPerson()->getName() << " / ID: " << dutyMember->getPerson()->getIdNumber()<< std::endl;
         std::cout << "Job Function: " << dutyMember->getJobFunction() << std::endl;
     }
     std::cout << "--------------------------------" << std::endl<< std::endl;
@@ -313,11 +313,13 @@ int main(){
     er3->setSupervisor(er1);
     //建立PassengerRole
     PassengerRole* pr1 = new PassengerRole();
+    PassengerRole* pr2 = new PassengerRole(); 
     //將人物賦予role
     p1->addRole(er1);
     p2->addRole(er2);
     p3->addRole(er3);
-    p4->addRole(pr1);
+    p3->addRole(pr1);
+    p4->addRole(pr2);
     //列出人物的role
     std::cout << "--------------------------------" << std::endl;
     p1->displayRoles();
@@ -330,26 +332,36 @@ int main(){
     p1->displaySupervisor();
     p2->displaySupervisor();
     p3->displaySupervisor();
+    std::cout << "--------------------------------" << std::endl;
+    //建立航空公司
+    Airline ncku("NCKU Airlines");
+    //新增航空公司職員
+    ncku.addCrewMember(p1);
+    ncku.addCrewMember(p2);
+    ncku.addCrewMember(p3);
+    //列出航空公司職員
+    std::cout << "--------------------------------" << std::endl;
+    ncku.listCrewMembers();
+    std::cout << "--------------------------------" << std::endl;
+    //建立regular flight
+    RegularFlight* r1 = ncku.addRegularFlight("09:00", "111");
+    //建立specific flight
+    SpecificFlight* s1 = r1->addSpecificFlight("20250101");
+    //建立booking
+    Booking* b1 = new Booking("1A");
+    Booking* b2 = new Booking("1B");
+    Booking* b3 = new Booking("1C");
+    //將booking加入specific flight
+    s1->addBooking(b1);
+    s1->addBooking(b2);
+    s1->addBooking(b3);
 
-    // //建立航空公司
-    // Airline ncku("NCKU Airlines");
-    // //建立regular flight
-    // RegularFlight* r1 = ncku.addRegularFlight("09:00", "111");
-    // //建立specific flight
-    // SpecificFlight* s1 = r1->addSpecificFlight("20250101");
-    // //建立booking
-    // Booking* b1 = new Booking("1A");
-    // Booking* b2 = new Booking("1B");
-    // Booking* b3 = new Booking("1C");
-    // //將booking加入specific flight
-    // s1->addBooking(b1);
-    // s1->addBooking(b2);
-    // s1->addBooking(b3);
-
-    // //將機組人員加入specific flight
-    // s1->addDutyMember(er1);
-    // s1->addDutyMember(er2);
-    // s1->addDutyMember(er3);
-    // //
+    //將機組人員加入specific flight
+    s1->addDutyMember(er1);
+    s1->addDutyMember(er2);
+    s1->addDutyMember(er3);
+    
+    //列出specific flight的機組人員
+    s1->listDutyMembers();
     return 0;
 }
