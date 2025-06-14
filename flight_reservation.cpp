@@ -1,8 +1,9 @@
 #include <iostream>
 #include <string>
 #include <vector>
+#include <algorithm>
 
-//Forward declaration
+//前向宣告
 class Person;
 class PersonRole;
 class PassengerRole;
@@ -12,12 +13,16 @@ class RegularFlight;
 class SpecificFlight;
 class Booking;
 
-
+//定義特殊航班類別
 class SpecificFlight{
         private:
+            //特殊航班的日期
             std::string date;
+            //特殊航班所屬的常規航班
             RegularFlight* regularFlight;
+            //特殊航班的訂位紀錄
             std::vector<Booking* > bookings;
+            //特殊航班的值勤機組人員
             std::vector<EmployeeRole* > dutyMembers;
         public:
             SpecificFlight(const std::string& date,RegularFlight* regularFlight):date(date),regularFlight(regularFlight){}        
@@ -25,21 +30,23 @@ class SpecificFlight{
             std::string getDate() const { return date; }
             RegularFlight* getRegularFlight() const { return regularFlight; }
 
-            //新增這特殊班次可訂位的座位
+            //新增這特殊航班可訂位的座位
             void addBooking(Booking* booking);
-            //新增會在Specific Flight上工作的機組人員
+            //新增特殊航班上值勤的機組人員
             void addDutyMember(EmployeeRole* person);
-            //顯示這特殊班次可訂位的座位
+            //顯示這特殊航班所有訂位
             void listBookings();
-
-            //顯示這特殊班次上的機組人員
+            //顯示這特殊航班上的機組人員
             void listDutyMembers();
 };
- 
+//定義常規航班類別
 class RegularFlight {
     private:
+        //常規航班的時間
         std::string time;
+        //常規航班的航班號碼
         std::string flightNumber;
+        //屬於常規航班的特殊航班
         std::vector<SpecificFlight* > specificFlights;
     public:
         RegularFlight(const std::string& time, const std::string& flightNumber): time(time), flightNumber(flightNumber) {};
@@ -48,16 +55,13 @@ class RegularFlight {
         std::string getFlightNumber() const { return flightNumber; }
         void setFlightNumber(const std::string& flightNumber){this->flightNumber=flightNumber;}
         std::vector<SpecificFlight* > getSpecificFlights() const { return specificFlights; }
-
-        //新增Specific Flight
+        //新增屬於此常規航班的特殊航班
         SpecificFlight* addSpecificFlight(const std::string& date){
             SpecificFlight* s = new SpecificFlight(date,this);
-            //將新增的specific flight 儲存起來
             specificFlights.push_back(s);
             return s;
         }
-
-        //顯示此regular flight所有specific flight
+        //顯示此常規航班所有特殊航班
         void listSpecificFlights() const {
             std::cout << "Specific flights of " << flightNumber << ":" << std::endl;
             for (const auto& specificFlight : specificFlights) {
@@ -66,10 +70,14 @@ class RegularFlight {
         }
 };
 
+//定義航空公司類別
 class Airline {
     private:
+        //航空公司的名稱
         std::string name;
+        //屬於此航空公司的常規航班
         std::vector<RegularFlight* > regularFlights;
+        //屬於此航空公司的機組人員
         std::vector<Person* > crewMembers;
     public:
         Airline(const std::string& name): name(name) {};
@@ -78,23 +86,20 @@ class Airline {
         std::vector<RegularFlight* > getRegularFlights() const { return regularFlights; }
         std::vector<Person* > getCrewMembers() const { return crewMembers; }
         
-        //新增Specific Flight
+        //新增屬於此航空公司的常規航班
         RegularFlight* addRegularFlight(const std::string& time, const std::string& flightNumber){
             RegularFlight* r = new RegularFlight(time,flightNumber);
-            //將新增的regular flight 儲存起來
             regularFlights.push_back(r);
             return r;
         }
-
-        //顯示此航空公司所有regular flight
+        //顯示此航空公司所有常規航班
         void listRegularFlights() const {
             std::cout << "Regular flights of " << name << ":" << std::endl;
             for (const auto& regularFlight : regularFlights) {
                 std::cout << "Flight Number: " << regularFlight->getFlightNumber() << " Time: " << regularFlight->getTime() << std::endl;
             }
         }
-
-        //用航班號碼搜尋特定regular flight
+        //用航班號碼搜尋此航空公司的常規航班
         RegularFlight* findParticularRegular(const std::string& flightNumber) const {
             for (const auto& regularFlight : regularFlights) {
                 if (regularFlight->getFlightNumber() == flightNumber) {
@@ -105,16 +110,15 @@ class Airline {
             exit(1);
             return nullptr;
         }
-
-        //新增crew member
+        //新增屬於此航空公司的機組人員
         void addCrewMember(Person* person){
             crewMembers.push_back(person);
         }
-
-        //顯示此航空公司所有crew member
+        //顯示此航空公司所有機組人員
         void listCrewMembers();
 };
 
+//定義人的職位抽象類別
 class PersonRole {
     private:
         Person* person;
@@ -123,28 +127,32 @@ class PersonRole {
         virtual ~PersonRole() = default;
         Person* getPerson() const { return person; }
         void setPerson(Person* person){this->person=person;}
-        virtual void displayRole() const = 0;  // 添加純虛擬函數
+        virtual void displayRole() const = 0; 
 }; 
 
-//兩個職位class都繼承自PersonRole
+//定義乘客職位類別，繼承自PersonRole
 class PassengerRole: public PersonRole{
     private:
+        //乘客的訂位紀錄
         std::vector<Booking* > bookings;
     public:
         PassengerRole() = default;
-
+        //新增訂位
         void bookSeat(Booking* booking){
             bookings.push_back(booking);
         }
-        //列出訂票紀錄
+        //取消訂位
+        void cancelBooking(Booking* booking){
+            bookings.erase(std::remove(bookings.begin(), bookings.end(), booking), bookings.end());
+        }
+        //列出乘客的所有訂位紀錄
         void listAllReservations();
-        
-        // 實現 displayRole 函數
+        //顯示乘客的職位
         void displayRole() const override {
             std::cout << "Passenger" << std::endl;
         }
 };
-
+//定義員工職位類別，繼承自PersonRole
 class EmployeeRole: public PersonRole{
     private:
         std::string jobFunction;
@@ -155,7 +163,7 @@ class EmployeeRole: public PersonRole{
         //設定直屬上司
         void setSupervisor  (EmployeeRole* supervisor){
             if(this->supervisor == nullptr){
-                this->supervisor = supervisor;
+                this->supervisor = supervisor; 
             }else{
                 std::cout << "A person can have at most one supervisor" << std::endl;
                 exit(1);
@@ -163,28 +171,29 @@ class EmployeeRole: public PersonRole{
         }
         std::string getJobFunction() const { return jobFunction; }
 
-        //顯示直屬上司，實作於最後
+        //顯示直屬上司
         void displaySupervisor ();
 
-        // 實現 displayRole 函數
+        //顯示員工的職位
         void displayRole() const override {
             std::cout << "Employee - " << jobFunction << std::endl;
         }
 };
-
+//定義人類別
 class Person {
     private:
+        //人的名字
         std::string name;
+        //人的身分證字號
         std::string idNumber;
         //一個人最多可以有兩個職位
         std::vector<PersonRole* > roles;
-
     public:
         Person(const std::string& name, const std::string& idNumber): name(name), idNumber(idNumber) {};
 
         std::string getName() const { return name; }
         std::string getIdNumber() const { return idNumber; }
-
+        //新增人的職位
         void addRole(PersonRole* role){
             //如果已經有兩個職位，則不能新增
             if(roles.size() >= 2){
@@ -192,7 +201,7 @@ class Person {
                 exit(1);
             }
             if (roles.size() == 1) {
-                // 當已有一個角色時，檢查是否與新角色為相同類別
+                // 當已有一個角色時，檢查是否與新角色為相同類別，防止有相同職位
                 PersonRole* existingRole = roles.front();
                 if (typeid(*role) == typeid(*existingRole)) {
                     std::cout << "A person cannot have duplicate role types." << std::endl;
@@ -202,16 +211,14 @@ class Person {
                 roles.push_back(role);
                 role->setPerson(this);
         }
-
-        //顯示這位使用者的所有職位
+        //顯示這個人的所有職位
         void displayRoles() const {
             std::cout << name << " (" << idNumber << ") has roles :" << std::endl;
             for (const auto& role : roles) {
                 role->displayRole();
             }
         }
-
-        //顯示直屬上司
+        //顯示這個人的直屬上司
         void displaySupervisor(){
             std::cout<<name<<" has supervisor:"<<std::endl;
             for (auto& role : roles) {
@@ -222,13 +229,15 @@ class Person {
             }
         }
 };
-
+//定義訂位類別
 class Booking{
     private:
+        //訂位的座位號碼
         std::string seatNumber;
+        //訂位所屬的常規航班
         RegularFlight* regularFlight;
+        //訂位所屬的特殊航班
         SpecificFlight* specificFlight;
-
     public:
         Booking(const std::string& seatNumber): seatNumber(seatNumber) {};
 
@@ -360,8 +369,26 @@ int main(){
     s1->addDutyMember(er1);
     s1->addDutyMember(er2);
     s1->addDutyMember(er3);
-    
+
     //列出specific flight的機組人員
     s1->listDutyMembers();
+    //列出航空公司所有常規航班
+    ncku.listRegularFlights();
+    //列出regular flight的特殊航班
+    r1->listSpecificFlights();
+    //列出specific flight的訂位
+    s1->listBookings();
+    //乘客訂位
+    pr2->bookSeat(b1);
+    pr2->bookSeat(b2);
+    //列出乘客的訂位
+    std::cout <<"取消訂位前" << std::endl;
+    pr2->listAllReservations();
+    //乘客取消訂位
+    pr2->cancelBooking(b1);
+    //列出乘客的訂位
+    std::cout <<"取消訂位後" << std::endl;
+    pr2->listAllReservations();
+
     return 0;
 }
